@@ -1,0 +1,222 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "echo X:\u9999${config:build.test}mix${config:build.spc}${config:edit.src}!",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "setup",
+                "make hello",
+                "make riscv"
+            ]
+        },
+       	{
+            "hide": true,
+            "label": "setup",
+            "type": "shell",
+            "linux": {
+                "command": "cc -o foreach.exe ../tools/foreach.c"
+            },
+            "osx": {
+                "command": "cc -o foreach.exe ../tools/foreach.c"
+            },
+            "windows": {
+                "command": "cl /Fe: foreach.exe ../tools/foreach.c"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make path"
+            ]
+ 
+        },
+       	{
+            "hide": true,
+            "label": "make riscv sym",
+            "type": "shell",
+            "linux": {
+                "command": "${config:IVL} ${config:IVLFLAGS} -D SIM=SIM -o sim.vvp ${config:VLOG_SRC} ../src/soc_tb.v && ${config:VVP} -N sim.vvp -lx2 && ${config:GTKW} soc_tb.vcd ../src/config.gtkw"
+	    },
+            "osx": {
+                "command": "cc -o edit ${config:edit.src}"
+            },
+            "windows": {
+                "command": "cl /Fe: edit ${config:edit.src}"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make rom",
+                "make path"
+            ]
+        },
+
+       	{
+            "hide": true,
+            "label": "make riscv",
+            "type": "shell",
+            "linux": {
+                "command": "echo done"
+	    },
+            "osx": {
+                "command": "cc -o edit ${config:edit.src}"
+            },
+            "windows": {
+                "command": "cl /Fe: edit ${config:edit.src}"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make path",
+		"make riscv sym",
+		"make riscv impl"
+            ]
+        },
+       	{
+            "hide": true,
+            "label": "make riscv impl",
+            "type": "shell",
+            "linux": {
+                "command": "${config:NEXTPNR} --device CCGM1A1 --json ${config:TOP}.json ${config:PRFLAGS} --vopt out=${config:TOP}.txt --router router2 --freq 10 --sdc constraints.sdc --write ${config:TOP}_pr.json"
+	    },
+            "osx": {
+                "command": "cc -o edit ${config:edit.src}"
+            },
+            "windows": {
+                "command": "cl /Fe: edit ${config:edit.src}"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+		"make riscv synth"
+            ]
+        },
+       	{
+            "hide": true,
+            "label": "make riscv synth",
+            "type": "shell",
+            "linux": {
+                "commandq": "${config:YOSYS} -ql synth.log -p 'read_verilog -defer -sv ${config:VLOG_SRC}; synth_gatemate -top ${config:TOP} -luttree -nomx8 -json ${config:TOP}.json -vlog ${config:TOP}_synth.v; write_verilog -norename -noattr ${config:TOP}_ys.v'",
+                "command": "${config:YOSYS} -ql synth.log -p 'read_verilog -defer -sv ${config:VLOG_SRC}; synth_gatemate -top ${config:TOP} -luttree -nomx8 -json ${config:TOP}.json ; write_verilog -norename -noattr ${config:TOP}_ys.v'",
+                "command1": "${config:YOSYS} -Q -ql synth.log -s ../src/gatemate.ys"
+	    },
+            "osx": {
+                "command": "cc -o edit ${config:edit.src}"
+            },
+            "windows": {
+                "command": "cl /Fe: edit ${config:edit.src}"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make path",
+                "make rom"
+            ]
+        } ,
+       	{
+            "hide": true,
+            "label": "make bin2hex",
+            "type": "shell",
+            "linux": {
+                "command": "cc -o bin2hex.exe ../tools/bin2hex.c"
+            },
+            "osx": {
+                "command": "cc -o foreach.exe ../tools/foreach.c"
+            },
+            "windows": {
+                "command": "cl /Fe: foreach.exe ../tools/foreach.c"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make path"
+            ]
+ 
+        },
+        {
+            "hide": true,
+            "label": "make rom",
+            "type": "shell",
+            "linux": {
+                "command": "clang -target riscv32 -march=rv32i -fno-builtin -nostartfiles -nostdlib -Wl,--section-start=.text=0x0 -o rom.elf ../src/rom.S && llvm-objcopy rom.elf -Obinary rom.bin && ./bin2hex.exe rom.bin ../src/rom.hex && llvm-objdump -all rom.elf"
+            },
+            "osx": {
+                "command": "mkdir -p build"
+            },
+            "windows": {
+                "command": "cd build 2>NUL && cd .. || md build"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+	    "dependsOn": [
+                "make bin2hex"
+            ]
+
+        },
+        {
+            "hide": true,
+            "label": "make path",
+            "type": "shell",
+            "linux": {
+                "command": "mkdir -p build"
+            },
+            "osx": {
+                "command": "mkdir -p build"
+            },
+            "windows": {
+                "command": "cd build 2>NUL && cd .. || md build"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "hide": true,
+            "label": "make hello",
+            "type": "shell",
+            "linux": {
+                "command": "./foreach.exe 'echo ${name} ' \"\\\"trip 'off\\\"\" Hello `uname -a`"
+            },
+            "osx": {
+                "command": "./foreach.exe 'echo ${name} ' \"\\\"trip 'off\\\"\" Hello `uname -a`"
+            },
+            "windows": {
+               "command": "foreach.exe \"echo ${name} \" \"\\\"trip 'off\\\"\" Hello \"Windows 11\" 12"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "dependsOn": [
+                "setup"
+            ]
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "linux": {
+                "command": "rm -rf build"
+            },
+            "osx": {
+                "command": "rm -rf build"
+            },
+            "windows": {
+                "command": "del build\\*.* && rmdir build"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": [],
+            "problemMatcher": []
+        }
+    ]
+}
+

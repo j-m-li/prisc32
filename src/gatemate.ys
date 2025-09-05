@@ -1,0 +1,127 @@
+
+echo on
+	read_verilog -defer ../src/soc.v ../src/riscv.v ../src/data_cache.v ../src/code_cache.v
+
+   begin:
+            read_verilog -lib -specify +/gatemate/cells_sim.v +/gatemate/cells_bb.v
+            hierarchy -check -top code_cache
+
+        prepare:
+            proc
+            flatten
+            tribuf -logic
+            deminout
+            opt_expr
+            opt_clean
+            check
+            opt -nodffe -nosdff
+            fsm
+            opt
+            wreduce
+            peepopt
+            opt_clean
+            muxpack
+            share
+            techmap -map +/cmp2lut.v -D LUT_WIDTH=4
+            opt_expr
+            opt_clean
+
+        map_mult:    
+#            techmap -map +/gatemate/mul_map.v
+
+        coarse:
+            alumacc
+            opt
+            memory -nomap -no-rw-check
+            opt_clean
+
+        map_bram:    
+            memory_libmap -lib +/gatemate/brams.txt
+            techmap -map +/gatemate/brams_map.v
+
+        map_ffram:
+            opt -fast -mux_undef -undriven -fine
+            memory_map 
+#            opt -undriven -fine
+#opt_expr
+#opt_merge -nomux
+#opt_muxtree
+opt_reduce
+#opt_merge
+opt_dff
+opt_clean
+#opt_expr
+
+#show p.ps
+
+        map_gates:
+            techmap -map +/techmap.v  -map +/gatemate/arith_map.v
+#            opt -fast
+opt_expr
+opt_merge -nomux
+opt_muxtree
+opt_reduce
+opt_merge
+opt_dff
+opt_clean
+opt_expr
+
+
+        map_io:    
+            iopadmap -bits -inpad CC_IBUF Y:I -outpad CC_OBUF A:O -toutpad CC_TOBUF ~T:A:O -tinoutpad CC_IOBUF ~T:Y:A:IO
+            clean
+
+        map_regs:
+            opt_clean
+            dfflegalize -cell $_DFFE_????_ 01 -cell $_DLATCH_???_ 01
+            techmap -map +/gatemate/reg_map.v
+            opt_expr -mux_undef
+            simplemap
+            opt_clean
+
+        map_muxs:
+            muxcover  -mux4 -mux8
+   #         opt -full
+opt_expr
+opt_merge -nomux
+opt_muxtree
+opt_reduce
+opt_merge
+opt_dff
+opt_clean
+opt_expr
+
+
+            simplemap
+            techmap -map +/gatemate/mux_map.v
+
+        map_luts:
+            abc  -genlib +/gatemate/lut_tree_cells.genlib  
+            techmap -map +/gatemate/lut_tree_map.v    
+            gatemate_foldinv    
+            techmap -map +/gatemate/inv_map.v    
+            #abc  -dress -lut 4    
+            clean
+
+        map_cells:
+            techmap -map +/gatemate/lut_map.v
+            clean
+
+        map_bufg:    
+            clkbufmap -buf CC_BUFG O:I
+            clean
+
+        check:
+            hierarchy -check
+            stat -width
+            check -noinit
+            blackbox =A:whitebox
+
+        vlog:
+            opt_clean -purge
+            write_verilog -noattr soc_synth.v 
+
+        json:
+            write_json soc.json
+
+

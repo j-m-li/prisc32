@@ -1,0 +1,40 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/contrib": true
+      },
+      "search.exclude": {
+        "**/contrib": true
+      },
+      "files.associations": {
+        "xutility": "c",
+        "memory": "c",
+        "cstdlib": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "vector": "c",
+        "stdio.h": "c",
+        "klib.h": "c",
+        "internal.h": "c"
+      },
+      	"TOOLCHAIN": "../../oss-cad-suite",
+      	"VLOG_SRC": "../src/soc.v ../src/mips.v ../src/cache.v ",
+	"PRFLAGS": "--vopt allow-unconstrained --vopt ccf=../src/gatemate.ccf",
+	"TOP": "soc",
+      	"EXEPATH": "${config:TOOLCHAIN}/bin",
+      	"EXE": "",
+      	"YOSYS": "${config:EXEPATH}/yosys",
+	"NEXTPNR": "${config:EXEPATH}/nextpnr-himbaechel",
+	"OFL": "${config:EXEPATH}/openFPGALoader",
+	"GMPACK":  "${config:EXEPATH}/gmpack",
+	"GTKW": "${config:EXEPATH}/gtkwave",
+	"IVL": "${config:EXEPATH}/iverilog",
+	"VVP": "${config:EXEPATH}/vvp",
+	"IVLFLAGS": "-g2012 -gspecify -Ttyp",
+	"GHDL": "${config:EXEPATH}/ghdl",
+	"CELLS_SYNTH": "${config:TOOLCHAIN}/share/yosys/gatemate/cells_sim.v",
+	"CELLS_IMPL": "${config:TOOLCHAIN}/share/yosys/gatemate/cells_bb.v",
+      	"build.spc": " "
+      
+}

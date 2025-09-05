@@ -1,0 +1,22 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Wed Jul 16 16:16:12 2025
+[*]
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-14.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 297
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 158
+@28
+tb.O_led[0]
+tb.I_rst_btn[0]
+@29
+tb.I_clk[0]
+@23
+tb.IO_gpio[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

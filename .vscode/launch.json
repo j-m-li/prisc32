@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {  
+            "name": "Build all",
+            "request": "launch",
+            "type": "node-terminal",
+            "env": {
+            },
+            "windows": {
+             "preLaunchTask": "build"
+            }, "linux": {
+             "preLaunchTask": "build"
+            }, 
+            "osx": {
+             "preLaunchTask": "build"
+            },
+            "command": "exit",
+            "cwd": "${workspaceFolder}/build"
+        }
+    ]
+}
